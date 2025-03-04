@@ -1,0 +1,29 @@
+body {
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  form {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  input, button {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: none;
+  }
+  
+  button {
+    background: #1c92d2;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background: #0f7ac1;
+  }
+  
