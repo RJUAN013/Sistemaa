@@ -2,7 +2,7 @@ import React from 'react';
 import { Controller } from 'react-hook-form';
 import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import ControlledInput from './ControlledInput';
-import ControlledCampoDate from './ControlledDate';
+import ControlledDate from './ControlledDate';
 
 const ControlledRadio = ({ control, setValue, watch, inputType }) => {
   const watchHasPlanoSaude = watch("hasPlanoSaude", false);
@@ -47,7 +47,7 @@ const ControlledRadio = ({ control, setValue, watch, inputType }) => {
                 inputType="integer"
                 rules={{ required: "Matrícula do Plano é obrigatória" }}
               />
-              <ControlledCampoDate
+              <ControlledDate
                 name="validadePlano"
                 control={control}
                 label="Validade do Plano"

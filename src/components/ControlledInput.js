@@ -80,7 +80,6 @@ const ControlledInput = ({ name, control, label, inputType, rules, multiline, ..
       rules={{
         ...rules,
         validate: getValidation(),
-        required: `${label} é obrigatório`
       }}
       render={({ field, fieldState }) => (
         <TextField
