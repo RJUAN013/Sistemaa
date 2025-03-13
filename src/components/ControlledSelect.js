@@ -79,6 +79,11 @@ const ControlledSelect = ({ name, control, label, type, rules, ...props }) => {
       { value: "Tocantins", label: "TO" },
       { value: "Estrangeiro", label: "EST" },
     ],
+    tipoUsuario: [
+      { value: "", label: "Selecione" },
+      {value: "administrador", label: "Administrador"},
+      {value: "usuario", label: "Usuário"},
+    ]
   };
 
   return (
@@ -86,10 +91,7 @@ const ControlledSelect = ({ name, control, label, type, rules, ...props }) => {
       name={name}
       control={control}
       defaultValue=""
-      rules={{
-        ...rules,
-        required: `${label} é obrigatório`
-      }}
+      rules={rules}
       render={({ field, fieldState }) => (
         <TextField
           {...field}

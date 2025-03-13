@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ref, get, query, orderByChild, equalTo, set } from 'firebase/database';
 import { getNextId } from '../../firebaseConfig';
@@ -8,6 +8,8 @@ import ControlledRadio from '../ControlledRadio.js';
 import ControlledDate from '../ControlledDate.js';
 import ControlledEmail from '../ControlledEmail.js';
 import ControlledSelect from '../ControlledSelect.js';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   CadastroContainer,
   CadastroTitle,
@@ -24,6 +26,19 @@ import database from '../../firebaseConfig';
 const CadastroPaciente = () => {
   const { control, handleSubmit, setValue, watch, trigger, formState: { errors }, setFocus } = useForm();
   const [tabValue, setTabValue] = React.useState(0);
+  const [requiredFields, setRequiredFields] = useState({});
+
+  useEffect(() => {
+    // Carregar as configurações de campos obrigatórios do banco de dados
+    const loadSettings = async () => {
+      const settingsRef = ref(database, 'settings/cadastroPaciente');
+      const snapshot = await get(settingsRef);
+      if (snapshot.exists()) {
+        setRequiredFields(snapshot.val());
+      }
+    };
+    loadSettings();
+  }, []);
 
   const handleChange = async (event, newValue) => {
     const isValid = await trigger(); // Verifica todos os campos da aba atual
@@ -33,8 +48,9 @@ const CadastroPaciente = () => {
     } else {
       // Se houver erros, encontra o primeiro campo com erro e foca nele
       const firstErrorField = Object.keys(errors)[0];
+      const fieldLabel = errors[firstErrorField]?.message || "Por favor, preencha todos os campos obrigatórios.";
       setFocus(firstErrorField);
-      alert(`O campo ${firstErrorField} é obrigatório`);
+      toast.error(`Erro no campo: ${fieldLabel}`);
     }
   };
 
@@ -74,7 +90,7 @@ const CadastroPaciente = () => {
       });
   };
 
-  const verificarDuplicidade = async (data) => {
+    const verificarDuplicidade = async (data) => {
     const pacienteRef = ref(database, 'pacientes');
     const queries = [
       { field: 'cpf', value: data.cpf, label: 'CPF' },
@@ -113,27 +129,27 @@ const CadastroPaciente = () => {
                     control={control}
                     label="Nome Completo"
                     type="text"
-                    rules={{ required: "Nome é obrigatório" }}
+                    rules={requiredFields.nome ? { required: "Nome é obrigatório" } : {}}
                   />
                   <ControlledDate
                     name="dataNascimento"
                     control={control}
                     label="Data de Nascimento"
-                    rules={{}}
+                    rules={requiredFields.dataNascimento ? { required: "Data de Nascimento é obrigatório" } : {}}
                   />
                   <ControlledSelect
                     name="sexo"
                     control={control}
                     label="Sexo"
                     type="sexo"
-                    rules={{ required: "Sexo é obrigatório" }}
+                    rules={requiredFields.sexo ? { required: "Sexo é obrigatório" } : {}}
                   />
                   <ControlledSelect
                     name="cor"
                     control={control}
                     label="Cor"
                     type="cor"
-                    rules={{ required: "Cor é obrigatória" }}
+                    rules={requiredFields.cor ? { required: "Cor é obrigatória" } : {}}
                   />
                 </CampoSection>
                 <CampoSection>
@@ -142,27 +158,27 @@ const CadastroPaciente = () => {
                     control={control}
                     label="Estado Civil"
                     type="estadoCivil"
-                    rules={{ required: "Estado Civil é obrigatório" }}
+                    rules={requiredFields.estadoCivil ? { required: "Estado Civil é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="telefone"
                     control={control}
                     label="Contato"
                     type="integer"
-                    rules={{ required: "Telefone é obrigatório" }}
+                    rules={requiredFields.telefone ? { required: "Telefone é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="profissao"
                     control={control}
                     label="Profissão"
                     type="text"
-                    rules={{ required: "Profissão é obrigatória" }}
+                    rules={requiredFields.profissao ? { required: "Profissão é obrigatória" } : {}}
                   />
                   <ControlledEmail
                     name="email"
                     control={control}
                     label="E-mail"
-                    rules={{ required: "E-mail é obrigatório" }}
+                    rules={requiredFields.email ? { required: "E-mail é obrigatório" } : {}}
                   />
                 </CampoSection>
               </InforSection>
@@ -189,21 +205,21 @@ const CadastroPaciente = () => {
                     control={control}
                     label="CPF"
                     type="cpf"
-                    rules={{ required: "CPF é obrigatório" }}
+                    rules={requiredFields.cpf ? { required: "CPF é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="rg"
                     control={control}
                     label="RG"
                     type="integer"
-                    rules={{ required: "RG é obrigatório" }}
+                    rules={requiredFields.rg ? { required: "RG é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="cartaoSus"
                     control={control}
                     label="Cartão SUS"
                     type="integer"
-                    rules={{ required: "Cartão SUS é obrigatório" }}
+                    rules={requiredFields.cartaoSus ? { required: "Cartão SUS é obrigatório" } : {}}
                   />
                 </CampoSection>
                 <CampoSection>
@@ -225,7 +241,7 @@ const CadastroPaciente = () => {
                     control={control}
                     label="Endereço"
                     type="text"
-                    rules={{ required: "Endereço é obrigatório" }}
+                    rules={requiredFields.logradouro ? { required: "Endereço é obrigatório" } : {}}
                     placeholder="Rua, Ave, Logradouro..."
                   />
                   <ControlledInput
@@ -233,21 +249,21 @@ const CadastroPaciente = () => {
                     control={control}
                     label="Número"
                     type="integer"
-                    rules={{ required: "Número é obrigatório" }}
+                    rules={requiredFields.numero ? { required: "Número é obrigatório" } : {}}
                   />
                   <ControlledSelect
                     name="complemento"
                     control={control}
                     label="Complemento"
                     type="complemento"
-                    rules={{}}
+                    rules={requiredFields.complemento ? { required: "Complemento é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="cidade"
                     control={control}
                     label="Cidade/Município"
                     type="text"
-                    rules={{ required: "Cidade/Município é obrigatória" }}
+                    rules={requiredFields.cidade ? { required: "Cidade/Município é obrigatória" } : {}}
                   />
                 </CampoSection>
                 <CampoSection>
@@ -256,28 +272,28 @@ const CadastroPaciente = () => {
                     control={control}
                     label="País"
                     type="pais"
-                    rules={{ required: "País é obrigatório" }}
+                    rules={requiredFields.pais ? { required: "País é obrigatório" } : {}}
                   />
                   <ControlledSelect
                     name="estado"
                     control={control}
                     label="Estado/UF"
                     type="estado"
-                    rules={{ required: "Estado/UF é obrigatório" }}
+                    rules={requiredFields.estado ? { required: "Estado/UF é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="cep"
                     control={control}
                     label="CEP"
                     type="integer"
-                    rules={{ required: "CEP é obrigatório" }}
+                    rules={requiredFields.cep ? { required: "CEP é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="referencia"
                     control={control}
                     label="Ponto de Referência"
                     type="text"
-                   
+                    rules={requiredFields.referencia ? { required: "Ponto de Referência é obrigatório" } : {}}
                   />
                 </CampoSection>
               </InforSection>
@@ -296,21 +312,21 @@ const CadastroPaciente = () => {
                     control={control}
                     label="Altura"
                     type="decimal"
-                    rules={{ required: "Altura é obrigatório" }}
+                    rules={requiredFields.altura ? { required: "Altura é obrigatória" } : {}}
                   />
                   <ControlledInput
                     name="peso"
                     control={control}
                     label="Peso"
                     type="decimal"
-                    rules={{ required: "Peso é obrigatorio" }}
+                    rules={requiredFields.peso ? { required: "Peso é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="tipoSanguineo"
                     control={control}
                     label="Tipo Sanguíneo"
                     type="text"
-                    rules={{ required: "Tipo Sanguíneo  é obrigatório" }}
+                    rules={requiredFields.tipoSanguineo ? { required: "Tipo Sanguíneo é obrigatório" } : {}}
                   />
                 </CampoSection>
               </InforSection>
@@ -324,44 +340,35 @@ const CadastroPaciente = () => {
                     control={control}
                     label="Alergias"
                     type="text"
-                    rules={{ required: "Alergias é obrigatório" }}
+                    rules={requiredFields.alergias ? { required: "Alergias são obrigatórias" } : {}}
                   />
                   <ControlledInput
-                    name="doençasCronicas"
+                    name="doencasCronicas"
                     control={control}
                     label="Doenças Crônicas"
                     type="text"
-                    rules={{ required: "Doenças Cônicas são obrigtórios" }}
+                    rules={requiredFields.doencasCronicas ? { required: "Doenças Crônicas são obrigatórias" } : {}}
                   />
-                  <ControlledInput
-                    name="usoDeMedicamentos"
-                    control={control}
-                    label="Uso de Medicamentos"
-                    type="text"
-                    rules={{ required: "Uso de Medicamentos são obrigatósrias" }}
-                  />
-                </CampoSection>
-                <CampoSection>
-                  <ControlledInput
+                                    <ControlledInput
                     name="cirurgiasAnteriores"
                     control={control}
                     label="Cirurgias Anteriores"
                     type="text"
-                    rules={{ required: "Cirurgias Amteriores é obrigatorio" }}
+                    rules={requiredFields.cirurgiasAnteriores ? { required: "Cirurgias Anteriores são obrigatórias" } : {}}
                   />
                   <ControlledInput
-                    name="historicoFamiliarDeDoenças"
+                    name="historicoFamiliarDeDoencas"
                     control={control}
-                    label="Histórico Familia de Doenças"
+                    label="Histórico Familiar de Doenças"
                     type="text"
-                    rules={{ required: "Histórico Familiar de Doenças é obrigatorio" }}
+                    rules={requiredFields.historicoFamiliarDeDoencas ? { required: "Histórico Familiar de Doenças é obrigatório" } : {}}
                   />
                   <ControlledInput
                     name="habitosDeVida"
                     control={control}
                     label="Hábitos de Vida"
                     type="text"
-                    rules={{ required: "Hábitos de Vida é obrigatorio" }}
+                    rules={requiredFields.habitosDeVida ? { required: "Hábitos de Vida são obrigatórios" } : {}}
                   />
                 </CampoSection>
               </InforSection>
@@ -370,6 +377,7 @@ const CadastroPaciente = () => {
           </CadastroForm>
         </TabPanel>
       </Card>
+      <ToastContainer />
     </CadastroContainer>
   );
 };

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Controller } from "react-hook-form";
 import TextField from "@mui/material/TextField";
 
@@ -8,8 +9,7 @@ const ControlledDate = ({ name, control, label, rules, ...props }) => {
       control={control}
       defaultValue=""
       rules={{
-        ...rules,
-        required: `${label} é obrigatório`
+        ...rules
       }}
       render={({ field, fieldState }) => (
         <TextField

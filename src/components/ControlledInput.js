@@ -79,7 +79,7 @@ const ControlledInput = ({ name, control, label, inputType, rules, multiline, ..
       defaultValue=""
       rules={{
         ...rules,
-        validate: getValidation(),
+        validate: getValidation()
       }}
       render={({ field, fieldState }) => (
         <TextField

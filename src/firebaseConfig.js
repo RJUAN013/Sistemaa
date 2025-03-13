@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, get, set, child, increment } from 'firebase/database';
+import { getDatabase, ref, get, set, increment } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "SUA_API_KEY",

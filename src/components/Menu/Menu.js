@@ -16,7 +16,7 @@ const Menu = () => {
         <ItemContainer>
           <Card onClick={() => navigate('/cadastro-paciente')}>
             <ImageWrapper>
-              <img src={PacienteImage} alt="Imagem 1" width="150" height="150" />
+              <img src={PacienteImage} alt="Cadastro Paciente" width="150" height="150" />
             </ImageWrapper>
             <div>Cadastro Paciente</div>
           </Card>
@@ -24,7 +24,7 @@ const Menu = () => {
         <ItemContainer>
           <Card onClick={() => navigate('/anamnese')}>
             <ImageWrapper>
-              <img src={AnamneseImage} alt="Imagem 2" width="150" height="150" />
+              <img src={AnamneseImage} alt="Anamnese" width="150" height="150" />
             </ImageWrapper>
             <div>Anamnese</div>
           </Card>
@@ -32,7 +32,7 @@ const Menu = () => {
         <ItemContainer>
           <Card onClick={() => navigate('/consulta-paciente')}>
             <ImageWrapper>
-              <img src={ConsultaImage} alt="Imagem 3" width="150" height="150" />
+              <img src={ConsultaImage} alt="Consulta de Paciente" width="150" height="150" />
             </ImageWrapper>
             <div>Consulta de Paciente</div>
           </Card>
@@ -40,9 +40,25 @@ const Menu = () => {
         <ItemContainer>
           <Card onClick={() => navigate('/agendamento')}>
             <ImageWrapper>
-              <img src={AgendaImage} alt="Imagem 4" width="150" height="150" />
+              <img src={AgendaImage} alt="Agendamento" width="150" height="150" />
             </ImageWrapper>
             <div>Agendamento</div>
+          </Card>
+        </ItemContainer>
+        <ItemContainer> {/* Novo item para Cadastro de Usuário */}
+          <Card onClick={() => navigate('/cadastro-usuario')}>
+            <ImageWrapper>
+              <img src={AgendaImage} alt="Cadastro Usuário" width="150" height="150" />
+            </ImageWrapper>
+            <div>Cadastro Usuário</div>
+          </Card>
+        </ItemContainer>
+        <ItemContainer> {/* Novo item para Cadastro de Usuário */}
+          <Card onClick={() => navigate('/painel-controle')}>
+            <ImageWrapper>
+              <img src={AgendaImage} alt="Painel de Controle" width="150" height="150" />
+            </ImageWrapper>
+            <div>Painel de Controle</div>
           </Card>
         </ItemContainer>
       </div>

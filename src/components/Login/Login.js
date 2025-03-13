@@ -1,18 +1,41 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ref, get, child } from 'firebase/database';
 import { LoginContainer, LoginForm, LoginTitle, LoginLabel, LoginInput, LoginButton } from './Login.styles';
+import database from '../../firebaseConfig'; // Importe a configuração do Firebase
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [senha, setSenha] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (email === 'teste@teste.com' && senha === '123') {
+
+    // Verifica a credencial fixa do Administrador Master
+    if (username === 'master' && senha === '123') {
       navigate('/menu');
-    } else {
-      alert('E-mail ou senha incorretos');
+      return;
+    }
+
+    try {
+      // Verifica as credenciais dos usuários no banco de dados
+      const userRef = ref(database, 'usuarios');
+      const snapshot = await get(child(userRef, username));
+
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        if (userData.password === senha) {
+          navigate('/menu');
+        } else {
+          alert('Nome de usuário ou senha incorretos');
+        }
+      } else {
+        alert('Nome de usuário ou senha incorretos');
+      }
+    } catch (error) {
+      console.error('Erro ao verificar credenciais:', error);
+      alert('Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.');
     }
   };
 
@@ -21,8 +44,8 @@ const Login = () => {
       <LoginForm onSubmit={handleSubmit}>
         <LoginTitle>Login</LoginTitle>
         <LoginLabel>
-          E-mail:
-          <LoginInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          Nome de Usuário:
+          <LoginInput type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
         </LoginLabel>
         <LoginLabel>
           Senha:
