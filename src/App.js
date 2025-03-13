@@ -10,6 +10,7 @@ import ConsultaPaciente from './components/ConsultaPaciente/ConsultaPaciente';
 import Agendamento from './components/Agendamento/Agendamento';
 import CadastroUsuario from './components/CadastroUsuario/CadastroUsuario';
 import PainelControle from './components/PainelControle/PainelControle';
+import AtendimentosAbertos from './components/AtendimentosAbertos/AtendimentosAbertos';
 
 const App = () => {
   // Obtenha o usuário atual (isso deve ser substituído pela lógica de autenticação real)
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/agendamento" element={<Agendamento />} />
           <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
           <Route path="/painel-controle" element={<PainelControle currentUser={currentUser} />} /> {/* Defina a rota */}
+          <Route path="/atendimentos-abertos" element={<AtendimentosAbertos />} />
         </Routes>
       </Router>
     </ThemeProvider>

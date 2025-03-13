@@ -61,6 +61,14 @@ const Menu = () => {
             <div>Painel de Controle</div>
           </Card>
         </ItemContainer>
+        <ItemContainer> {/* Novo item para Cadastro de Usuário */}
+          <Card onClick={() => navigate('/atendimentos-abertos')}>
+            <ImageWrapper>
+              <img src={AgendaImage} alt="Atendimentos Abertos" width="150" height="150" />
+            </ImageWrapper>
+            <div>Atendimentos Abertos</div>
+          </Card>
+        </ItemContainer>
       </div>
     </MenuContainer>
   );

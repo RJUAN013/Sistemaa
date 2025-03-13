@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { ref, get, update } from 'firebase/database';
+import { ref, get, update, push } from 'firebase/database';
 import { TextField, Button, Typography } from '@mui/material';
 import database from '../../firebaseConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-//import ReactToPrint from 'react-to-print'; // Não necessário com a abordagem customizada
+import ControlledDate from '../ControlledDate';
+import ControlledInput from '../ControlledInput';
 import {
   AnamneseContainer,
   AnamneseTitle,
@@ -33,6 +34,12 @@ const Anamnese = () => {
         if (patient) {
           setPatientData(patient);
           // Carregar os dados no formulário
+          setValue('nome', patient.nome);
+          setValue('dataNascimento', patient.dataNascimento);
+          setValue('sexo', patient.sexo);
+          setValue('cor', patient.cor);
+          setValue('nomeResponsavel', patient.responsavel?.nome);
+          setValue('parentescoResponsavel', patient.responsavel?.parentesco);
           setValue('altura', patient.altura);
           setValue('peso', patient.peso);
           setValue('tipoSanguineo', patient.tipoSanguineo);
@@ -64,9 +71,15 @@ const Anamnese = () => {
     }
 
     try {
-      // Atualizar os dados no cadastro do paciente
-      const patientRef = ref(database, `pacientes/${patientData.id}`);
-      await update(patientRef, {
+      // Salvar a anamnese única para o paciente no banco de dados
+      const anamneseRef = ref(database, `anamneses/${patientData.id}`);
+      const newAnamneseRef = push(anamneseRef);
+      await update(newAnamneseRef, {
+        sintomas: data.sintomas,
+        motivoConsulta: data.motivoConsulta,
+        observacoes: data.observacoes,
+        exames: data.exames, // Adiciona o campo para anexar exames
+        status: 'aberto',
         altura: data.altura,
         peso: data.peso,
         tipoSanguineo: data.tipoSanguineo,
@@ -78,28 +91,24 @@ const Anamnese = () => {
         habitosDeVida: data.habitosDeVida,
       });
 
-      // Salvar as informações atuais do paciente na anamnese
-      const anamneseRef = ref(database, `anamneses/${patientData.id}`);
-      await update(anamneseRef, {
-        sintomas: data.sintomas,
-        motivoConsulta: data.motivoConsulta,
-        observacoes: data.observacoes,
-      });
-
-      toast.success('Dados atualizados com sucesso!');
+      toast.success('Atendimento iniciado com sucesso!');
     } catch (error) {
-      toast.error('Erro ao atualizar dados: ' + error.message);
+      toast.error('Erro ao iniciar o atendimento: ' + error.message);
     }
   };
 
   const handlePrint = () => {
-    const printContent = printRef.current.innerHTML;
-    const printWindow = window.open('', '', 'width=800,height=600');
-    printWindow.document.write('<html><head><title>Imprimir Anamnese</title></head><body>');
-    printWindow.document.write(printContent);
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
-    printWindow.print();
+    if (printRef.current) {
+      const printContent = printRef.current.innerHTML;
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write('<html><head><title>Imprimir Anamnese</title></head><body>');
+      printWindow.document.write(printContent);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    } else {
+      toast.error('Erro ao imprimir: conteúdo não encontrado');
+    }
   };
 
   return (
@@ -108,11 +117,12 @@ const Anamnese = () => {
       
       {/* Campo para buscar paciente pelo CPF */}
       <SearchSection>
-        <Controller
+        <ControlledInput
           name="cpf"
           control={control}
-          defaultValue=""
-          render={({ field }) => <TextField {...field} label="CPF" fullWidth />}
+          label="CPF"
+          inputType="cpf"
+          rules={{ required: "CPF é obrigatório" }}
         />
         <SearchButton
           type="button"
@@ -128,10 +138,10 @@ const Anamnese = () => {
           {/* Dados Pessoais */}
           <AnamneseSection>
             <Typography variant="h6">Dados Pessoais</Typography>
-            <TextField label="Nome Completo" value={patientData.nome} fullWidth disabled />
-            <TextField label="Data de Nascimento" value={patientData.dataNascimento} fullWidth disabled />
-            <TextField label="Sexo" value={patientData.sexo} fullWidth disabled />
-            <TextField label="Cor" value={patientData.cor} fullWidth disabled />
+            <ControlledInput name="nome" control={control} label="Nome Completo" inputType="text" disabled />
+            <ControlledDate name="dataNascimento" control={control} label="Data de Nascimento" disabled />
+            <ControlledInput name="sexo" control={control} label="Sexo" inputType="text" disabled />
+            <ControlledInput name="cor" control={control} label="Cor" inputType="text" disabled />
             {/* Adicione outros campos pessoais conforme necessário */}
           </AnamneseSection>
           
@@ -139,8 +149,8 @@ const Anamnese = () => {
           {patientData.responsavel && (
             <AnamneseSection>
               <Typography variant="h6">Informações do Responsável</Typography>
-              <TextField label="Nome do Responsável" value={patientData.responsavel.nome} fullWidth disabled />
-              <TextField label="Parentesco" value={patientData.responsavel.parentesco} fullWidth disabled />
+              <ControlledInput name="nomeResponsavel" control={control} label="Nome do Responsável" inputType="text" disabled />
+              <ControlledInput name="parentescoResponsavel" control={control} label="Parentesco" inputType="text" disabled />
               {/* Adicione outros campos do responsável conforme necessário */}
             </AnamneseSection>
           )}
@@ -148,65 +158,64 @@ const Anamnese = () => {
           {/* Dados Físicos */}
           <AnamneseSection>
             <Typography variant="h6">Dados Físicos</Typography>
-            <Controller
+            <ControlledInput
               name="altura"
               control={control}
-              defaultValue={patientData.altura}
-              render={({ field }) => <TextField {...field} label="Altura" fullWidth />}
+              label="Altura"
+              inputType="decimal"
             />
-            <Controller
+            <ControlledInput
               name="peso"
               control={control}
-              defaultValue={patientData.peso}
-              render={({ field }) => <TextField {...field} label="Peso" fullWidth />}
+              label="Peso"
+              inputType="decimal"
             />
-            <Controller
+            <ControlledInput
               name="tipoSanguineo"
               control={control}
-              defaultValue={patientData.tipoSanguineo}
-              render={({ field }) => <TextField {...field} label="Tipo Sanguíneo" fullWidth />}
+              label="Tipo Sanguíneo"
+              inputType="text"
             />
-            {/* Adicione outros dados físicos conforme necessário */}
           </AnamneseSection>
           
           {/* Histórico de Saúde */}
           <AnamneseSection>
             <Typography variant="h6">Histórico de Saúde</Typography>
-            <Controller
+            <ControlledInput
               name="alergias"
               control={control}
-              defaultValue={patientData.alergias}
-              render={({ field }) => <TextField {...field} label="Alergias" fullWidth />}
+              label="Alergias"
+              inputType="text"
             />
-            <Controller
+            <ControlledInput
               name="doencasCronicas"
               control={control}
-              defaultValue={patientData.doencasCronicas}
-              render={({ field }) => <TextField {...field} label="Doenças Crônicas" fullWidth />}
+              label="Doenças Crônicas"
+              inputType="text"
             />
-            <Controller
+            <ControlledInput
               name="usoDeMedicamentos"
               control={control}
-              defaultValue={patientData.usoDeMedicamentos}
-              render={({ field }) => <TextField {...field} label="Uso de Medicamentos" fullWidth />}
+              label="Uso de Medicamentos"
+              inputType="text"
             />
-            <Controller
+            <ControlledInput
               name="cirurgiasAnteriores"
               control={control}
-              defaultValue={patientData.cirurgiasAnteriores}
-              render={({ field }) => <TextField {...field} label="Cirurgias Anteriores" fullWidth />}
+              label="Cirurgias Anteriores"
+              inputType="text"
             />
-            <Controller
+            <ControlledInput
               name="historicoFamiliarDeDoencas"
               control={control}
-              defaultValue={patientData.historicoFamiliarDeDoencas}
-              render={({ field }) => <TextField {...field} label="Histórico Familiar de Doenças" fullWidth />}
+              label="Histórico Familiar de Doenças"
+              inputType="text"
             />
-                        <Controller
+            <ControlledInput
               name="habitosDeVida"
               control={control}
-              defaultValue={patientData.habitosDeVida}
-              render={({ field }) => <TextField {...field} label="Hábitos de Vida" fullWidth />}
+              label="Hábitos de Vida"
+              inputType="text"
             />
             {/* Adicione outros campos de histórico de saúde conforme necessário */}
           </AnamneseSection>
@@ -215,27 +224,36 @@ const Anamnese = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <AnamneseSection>
               <Typography variant="h6">Informações Atuais do Paciente</Typography>
-              <Controller
+              <ControlledInput
                 name="sintomas"
                 control={control}
-                defaultValue=""
-                render={({ field }) => <TextField {...field} label="Sintomas" fullWidth />}
+                label="Sintomas"
+                inputType="file"
+                
               />
-              <Controller
+              <ControlledInput
                 name="motivoConsulta"
                 control={control}
-                defaultValue=""
-                render={({ field }) => <TextField {...field} label="Motivo da Consulta" fullWidth />}
+                label="Motivo da Consulta"
+                inputType="file"
+                
               />
-              <Controller
+              <ControlledInput
                 name="observacoes"
                 control={control}
-                defaultValue=""
-                render={({ field }) => <TextField {...field} label="Observações" fullWidth />}
+                label="Observações"
+                inputType="file"
+                
+              />
+              <ControlledInput
+                name="exames"
+                control={control}
+                label="Anexar Exames"
+                inputType="file"
               />
               {/* Adicione outros campos para informações atuais conforme necessário */}
             </AnamneseSection>
-            <AnamneseButton type="submit">Salvar Informações Atuais</AnamneseButton>
+            <AnamneseButton type="submit">Iniciar Atendimento</AnamneseButton>
           </form>
         </PrintContainer>
       )}

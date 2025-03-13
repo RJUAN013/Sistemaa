@@ -90,7 +90,7 @@ const CadastroPaciente = () => {
       });
   };
 
-    const verificarDuplicidade = async (data) => {
+  const verificarDuplicidade = async (data) => {
     const pacienteRef = ref(database, 'pacientes');
     const queries = [
       { field: 'cpf', value: data.cpf, label: 'CPF' },
@@ -298,39 +298,11 @@ const CadastroPaciente = () => {
                 </CampoSection>
               </InforSection>
             </CadastroSection>
-            <CadastroButton type="button" onClick={(e) => handleChange(e, 1)}>Próximo</CadastroButton>
+            <CadastroButton type="submit">Salvar</CadastroButton>
           </CadastroForm>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <CadastroForm onSubmit={handleSubmit(onSubmit)}>
-            <CadastroSection>
-              <CadastroSectionTitle>Dados Físicos</CadastroSectionTitle>
-              <InforSection>
-                <CampoSection>
-                  <ControlledInput
-                    name="altura"
-                    control={control}
-                    label="Altura"
-                    type="decimal"
-                    rules={requiredFields.altura ? { required: "Altura é obrigatória" } : {}}
-                  />
-                  <ControlledInput
-                    name="peso"
-                    control={control}
-                    label="Peso"
-                    type="decimal"
-                    rules={requiredFields.peso ? { required: "Peso é obrigatório" } : {}}
-                  />
-                  <ControlledInput
-                    name="tipoSanguineo"
-                    control={control}
-                    label="Tipo Sanguíneo"
-                    type="text"
-                    rules={requiredFields.tipoSanguineo ? { required: "Tipo Sanguíneo é obrigatório" } : {}}
-                  />
-                </CampoSection>
-              </InforSection>
-            </CadastroSection>
             <CadastroSection>
               <CadastroSectionTitle>Histórico de Saúde</CadastroSectionTitle>
               <InforSection>
@@ -349,7 +321,7 @@ const CadastroPaciente = () => {
                     type="text"
                     rules={requiredFields.doencasCronicas ? { required: "Doenças Crônicas são obrigatórias" } : {}}
                   />
-                                    <ControlledInput
+                  <ControlledInput
                     name="cirurgiasAnteriores"
                     control={control}
                     label="Cirurgias Anteriores"
