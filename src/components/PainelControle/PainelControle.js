@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ref, get, set } from 'firebase/database';
 import { Tabs, Tab, Box, Typography, FormControlLabel, Checkbox } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import database from '../../firebaseConfig';
-import { PainelContainer, PainelTitle, PainelCard, PainelSection, PainelForm, PainelButton } from './PainelControle.styles';
+import {
+  PainelContainer,
+  PainelTitle,
+  PainelCard,
+  PainelForm,
+  PainelButton,
+} from './PainelControle.styles';
 
-const PainelControle = ({ currentUser }) => {
-  const navigate = useNavigate();
+const PainelControle = () => {
   const [tabValue, setTabValue] = useState(0);
   const [fields, setFields] = useState({
+    // Campos do Painel Paciente
     nome: true,
     dataNascimento: true,
     sexo: true,
@@ -28,27 +33,58 @@ const PainelControle = ({ currentUser }) => {
     estado: true,
     cep: true,
     referencia: false,
+    // Campos do Painel Anamnese
     altura: true,
-    peso: true,
-    tipoSanguineo: true,
-    alergias: true,
-    doencasCronicas: true,
-    usoDeMedicamentos: true,
-    cirurgiasAnteriores: true,
     historicoFamiliarDeDoencas: true,
-    habitosDeVida: true
+    tipoSanguineo: true,
+    usoDeMedicamentos: true,
+    sintomas: true,
+    anexarExames: true,
+    alergias: true,
+    cirurgiasAnteriores: true,
+    motivoConsulta: true,
+    peso: true,
+    doencasCronicas: true,
+    habitosDeVida: true,
+    observacoes: true,
   });
 
-  useEffect(() => {
-    // Verifique se o usuário é um administrador
-    if (currentUser.type !== 'admin' && currentUser.type !== 'master') {
-      toast.error('Acesso negado. Apenas administradores podem acessar esta página.');
-      navigate('/');
-    }
-  }, [currentUser, navigate]);
+  const fieldLabels = {
+    // Campos do Painel Paciente
+    nome: "Nome Completo",
+    dataNascimento: "Data de Nascimento",
+    sexo: "Sexo",
+    cor: "Cor",
+    estadoCivil: "Estado Civil",
+    telefone: "Telefone",
+    profissao: "Profissão",
+    email: "E-mail",
+    cpf: "CPF",
+    logradouro: "Logradouro",
+    numero: "Número",
+    complemento: "Complemento",
+    cidade: "Cidade/Município",
+    pais: "País",
+    estado: "Estado/UF",
+    cep: "CEP",
+    referencia: "Ponto de Referência",
+    // Campos do Painel Anamnese
+    altura: "Altura",
+    historicoFamiliarDeDoencas: "Histórico Familiar de Doenças",
+    tipoSanguineo: "Tipo Sanguíneo",
+    usoDeMedicamentos: "Uso de Medicamentos",
+    sintomas: "Sintomas",
+    anexarExames: "Anexar Exames",
+    alergias: "Alergias",
+    cirurgiasAnteriores: "Cirurgias Anteriores",
+    motivoConsulta: "Motivo da Consulta",
+    peso: "Peso",
+    doencasCronicas: "Doenças Crônicas",
+    habitosDeVida: "Hábitos de Vida",
+    observacoes: "Observações",
+  };
 
   useEffect(() => {
-    // Carregar as configurações salvas do banco de dados
     const loadSettings = async () => {
       const settingsRef = ref(database, 'settings/cadastroPaciente');
       const snapshot = await get(settingsRef);
@@ -79,16 +115,22 @@ const PainelControle = ({ currentUser }) => {
 
   return (
     <PainelContainer>
-        <PainelTitle>Painel de Controle - Painel Paciente</PainelTitle>
+      <PainelTitle>Painel de Controle</PainelTitle>
       <PainelCard>
         <Tabs value={tabValue} onChange={handleChangeTab} aria-label="Painel Controle Tabs">
           <Tab label="Painel Paciente" />
-          <Tab label="Painel" />
+          <Tab label="Painel Anamnese" />
         </Tabs>
+        {/* Aba "Painel Paciente" */}
         <TabPanel value={tabValue} index={0}>
           <PainelForm>
-            <PainelSection>
-              {Object.keys(fields).map((field) => (
+            {Object.keys(fields)
+              .filter((field) => [
+                "nome", "dataNascimento", "sexo", "cor", "estadoCivil",
+                "telefone", "profissao", "email", "cpf", "logradouro",
+                "numero", "complemento", "cidade", "pais", "estado", "cep", "referencia",
+              ].includes(field))
+              .map((field) => (
                 <FormControlLabel
                   key={field}
                   control={
@@ -98,16 +140,37 @@ const PainelControle = ({ currentUser }) => {
                       name={field}
                     />
                   }
-                  label={field}
+                  label={fieldLabels[field]}
                 />
               ))}
-            </PainelSection>
-            <PainelButton type="button" onClick={handleSave}>
-              Salvar Configurações
-            </PainelButton>
+            <PainelButton onClick={handleSave}>Salvar Configurações</PainelButton>
           </PainelForm>
         </TabPanel>
+        {/* Aba "Painel Anamnese" */}
         <TabPanel value={tabValue} index={1}>
+          <PainelForm>
+            {Object.keys(fields)
+              .filter((field) => [
+                "altura", "historicoFamiliarDeDoencas", "tipoSanguineo",
+                "usoDeMedicamentos", "sintomas", "anexarExames", "alergias",
+                "cirurgiasAnteriores", "motivoConsulta", "peso", "doencasCronicas",
+                "habitosDeVida", "observacoes",
+              ].includes(field))
+              .map((field) => (
+                <FormControlLabel
+                  key={field}
+                  control={
+                    <Checkbox
+                      checked={fields[field]}
+                      onChange={handleChangeCheckbox}
+                      name={field}
+                    />
+                  }
+                  label={fieldLabels[field]}
+                />
+              ))}
+            <PainelButton onClick={handleSave}>Salvar Configurações</PainelButton>
+          </PainelForm>
         </TabPanel>
       </PainelCard>
       <ToastContainer />
